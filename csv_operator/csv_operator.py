@@ -12,7 +12,7 @@ class CsvOperator:
         :param sep: разделитель
         :return: DataTable
         """
-        df: pd.DataFrame = pd.read_csv(from_file, sep=sep)
+        df: pd.DataFrame = pd.read_csv(from_file, sep=sep, dtype=object)
         df[df.isna()] = None
 
         columns_name = [str(x) for x in df.columns]
