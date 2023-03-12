@@ -3,7 +3,9 @@
 ## Проектирование
 
 <h4 style="text-align: center;">Диаграмма классов</h4>
-![UML](/class_diagram.png)
+<p align="center">
+  <img src="class_diagram.png" />
+</p>
 
 ## Запуск
 ### Запуск со своей машины
