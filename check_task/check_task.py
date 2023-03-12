@@ -7,10 +7,16 @@ from rtt_finder.rtt_finder import RTTFinder
 
 
 class DNSGetIPException(Exception):
+    """
+    Исключение, возникающее при невозможности получить IP адрес по доменному имени
+    """
     pass
 
 
 class CheckResultPerfomance:
+    """
+    Класс для хранения результатов проверки
+    """
     def __init__(self, ip: str, port: int | None, check_end_time: datetime,
                  domain: str | None = None, rtt_ms: float | None = None, port_status: bool | None = None):
         self._ip: str = ip
@@ -21,6 +27,10 @@ class CheckResultPerfomance:
         self._port_status: bool | None = port_status
 
     def __str__(self):
+        """
+        Возвращает строковое представление объекта
+        :return:
+        """
         result_str = f"{self._check_end_datetime.strftime('%Y-%m-%d %H:%M:%S:%f')} | " \
                      f"{self._domain if self._domain is not None else '???'} | " \
                      f"{self._ip} | " \
@@ -34,6 +44,9 @@ class CheckResultPerfomance:
 
 
 class CheckTask:
+    """
+    Класс Задачи для проверки IP адреса и порта
+    """
     def __init__(self, ip: str, port: int, from_domain: str | None = None):
         self._ip = ip
         self._from_domain = from_domain
@@ -47,17 +60,33 @@ class CheckTask:
 
     @property
     def ip(self):
+        """
+        IP адрес для проверки
+        :return:
+        """
         return self._ip
 
     @property
     def port(self):
+        """
+        Порт для проверки
+        :return:
+        """
         return self._port
 
     @property
     def domain(self):
+        """
+        Доменное имя, из которого был получен IP адрес
+        :return:
+        """
         return self._from_domain
 
     def check_connection(self) -> CheckResultPerfomance:
+        """
+        Проверка соединения
+        :return: Результат проверки в виде объекта CheckResultPerfomance
+        """
         is_ok = self._ps.check_socket_connection()
         self._rtt_finder.a = 0 if is_ok else 1
         rtt = self._rtt_finder.find_roundtriptime(1)
@@ -66,14 +95,26 @@ class CheckTask:
         return res
 
     def __repr__(self):
+        """
+        Возвращает строковое представление объекта
+        """
         return f"CheckTask({self._ip}, {self._port}, {self._from_domain})"
 
 
 class CheckTaskFactory:
+    """
+    Фабрика для создания задач для проверки
+    """
     def __init__(self):
         self._domain_checker = DomainChecker()
 
     def create_check_tasks_for_address(self, address: str, ports: list[int] | None = None) -> list[CheckTask]:
+        """
+        Создает задачи для проверки по адресу и портам
+        :param address: адрес для проверки
+        :param ports: список портов для проверки
+        :return: список задач для проверки
+        """
         if ports is None or len(ports) == 0:
             ports = [-1]
         if is_valid_ipv4_address(address) or is_valid_ipv6_address(address):
@@ -84,11 +125,3 @@ class CheckTaskFactory:
             raise DNSGetIPException()
         from_domain = address
         return [CheckTask(ip, port, from_domain) for port in ports for ip in ips]
-
-
-if __name__ == '__main__':
-    fac = CheckTaskFactory()
-    c = fac.create_check_tasks_for_address('178.248.237.68', [80])
-    results = [c.check_connection() for c in c]
-    print(c)
-    print('\n'.join([str(x) for x in results]))

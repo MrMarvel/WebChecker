@@ -7,10 +7,10 @@ class CsvOperator:
     @staticmethod
     def read_csv(from_file: str, sep=';'):
         """
-
-        :param from_file:
-        :param sep:
-        :return:
+        Чтение csv файла
+        :param from_file: путь к файлу
+        :param sep: разделитель
+        :return: DataTable
         """
         df: pd.DataFrame = pd.read_csv(from_file, sep=sep)
         df[df.isna()] = None

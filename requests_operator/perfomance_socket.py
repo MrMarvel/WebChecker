@@ -4,12 +4,19 @@ import requests
 
 
 class PerfomanceSocket:
+    """
+    Класс для проверки и времени отклика сокета
+    """
     def __init__(self, ip: str, port: int, timeout: int = 2):
         self._ip = ip
         self._port = port
         self._timeout = timeout
 
     def check_socket_connection(self) -> bool:
+        """
+        Проверка сокета на доступность
+        :return: True - если сокет доступен, False - если нет
+        """
         ip = self._ip
         port = self._port
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -21,6 +28,10 @@ class PerfomanceSocket:
                 return False
 
     def find_socket_perfomance(self) -> timedelta:
+        """
+        Получение времени отклика сокета
+        :return: timedelta
+        """
         sock_params = (self._ip, self._port)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             # Set the timeout in the event that the host/port we are pinging doesn't send information back
@@ -35,8 +46,3 @@ class PerfomanceSocket:
             t2 = datetime.now()
             # RTT
             return t2 - t1
-
-
-if __name__ == '__main__':
-    # print(check_socket_connection('', 80))
-    pass

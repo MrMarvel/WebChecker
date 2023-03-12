@@ -29,6 +29,10 @@ class RTTFinder:
 
     @property
     def a(self):
+        """
+        Коэффициент сглаживания, заданный в виде числа с плавающей точкой в диапазоне [0, 1]
+        :return:
+        """
         return self._a
 
     @a.setter
@@ -39,9 +43,17 @@ class RTTFinder:
 
     @property
     def lost_packets(self):
+        """
+        Количество потерянных пакетов
+        :return:
+        """
         return self._lost_packets
 
     def _find_roundtriptime_iteration(self) -> timedelta:
+        """
+        Итерация метода для нахождения RTT (Round Trip Time) по заданному IP и порту
+        :return:
+        """
         try:
             interval = self._ps.find_socket_perfomance()
         except Exception as e:
@@ -62,6 +74,11 @@ class RTTFinder:
         return rtt
 
     def find_roundtriptime(self, attempts: int = 10) -> timedelta:
+        """
+        Метод для нахождения RTT (Round Trip Time) по заданному IP и порту
+        :param attempts: Количество итераций для нахождения RTT
+        :return: RTT в виде timedelta
+        """
         if attempts < 1:
             raise ValueError("Количество попыток должно быть больше 0")
         rtt = None
@@ -73,6 +90,3 @@ class RTTFinder:
         return f"RTTFinder({self._ip}, {self._port}, {self._a})"
 
 
-if __name__ == '__main__':
-    r = RTTFinder('34.96.123.111', 80, 0.9, timeout=2)
-    print(r.find_roundtriptime(1).total_seconds())

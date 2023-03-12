@@ -3,20 +3,33 @@ from csv_operator.csv_operator import CsvOperator, DataTable
 
 
 class ColumnsCountException(Exception):
+    """
+    Исключение, выбрасываемое, если количество столбцов в таблице не совпадает с форматом
+    """
     pass
 
 
 class AddressNotFoundException(Exception):
+    """
+    Исключение, выбрасываемое, если в таблице не указан адрес
+    """
     pass
 
 
 class TaskLoader:
+    """
+    Загрузчик задач
+    """
     def __init__(self, filename: str):
         self._filename = filename
         self._csv = CsvOperator()
         self._factory = CheckTaskFactory()
 
     def load(self) -> list[CheckTask]:
+        """
+        Загрузить задачи из файла
+        :return: Список задач
+        """
         dt: DataTable = self._csv.read_csv(self._filename)
         if len(dt.get_columns()) != 2:
             raise ColumnsCountException("Неверный формат файла!")
@@ -33,7 +46,3 @@ class TaskLoader:
             tasks += self._factory.create_check_tasks_for_address(address, ports)
         return tasks
 
-
-if __name__ == '__main__':
-    t = TaskLoader('../input.csv')
-    t.load()
