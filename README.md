@@ -3,7 +3,7 @@
 ## Проектирование
 
 <h4 style="text-align: center;">Диаграмма классов</h4>
-![](D:\Users\Sergey\Projects\PyProjects\WebChecker\class_diagram.png)
+![UML](/class_diagram.png)
 
 ## Запуск
 ### Запуск со своей машины
