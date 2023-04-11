@@ -4,6 +4,7 @@ from domain_checker.domain_checker import DomainChecker
 from domain_checker.ip_validator import *
 from requests_operator.perfomance_socket import PerfomanceSocket
 from rtt_finder.rtt_finder import RTTFinder
+from ssl_checker.ssl_checker import SSLChecker
 
 
 class DNSGetIPException(Exception):
@@ -18,13 +19,15 @@ class CheckResultPerfomance:
     Класс для хранения результатов проверки
     """
     def __init__(self, ip: str, port: int | None, check_end_time: datetime,
-                 domain: str | None = None, rtt_ms: float | None = None, port_status: bool | None = None):
+                 domain: str | None = None, rtt_ms: float | None = None, port_status: bool | None = None,
+                 ssl_status: bool | None = None):
         self._ip: str = ip
         self._port: int | None = port
         self._check_end_datetime: datetime = check_end_time
         self._domain: str | None = domain
         self._rtt_ms: float | None = rtt_ms
         self._port_status: bool | None = port_status
+        self._ssl_status: bool | None = ssl_status
 
     def __str__(self):
         """
@@ -40,6 +43,8 @@ class CheckResultPerfomance:
             result_str += f"{'Opened' if self._port_status else 'Not opened'}"
         else:
             result_str += f"{'???'}"
+        if self._ssl_status is not None:
+            result_str += f" | {'valid cert' if self._ssl_status else 'INVALID CERT'}"
         return result_str
 
 
@@ -57,6 +62,9 @@ class CheckTask:
             port_to_test = port
         self._ps = PerfomanceSocket(ip, port_to_test)
         self._rtt_finder = RTTFinder(self._ip, port_to_test, a=0)
+        self._ssl_checker = None
+        if port_to_test == 443:
+            self._ssl_checker = SSLChecker(self._ip, port_to_test)
 
     @property
     def ip(self):
@@ -90,8 +98,13 @@ class CheckTask:
         is_ok = self._ps.check_socket_connection()
         self._rtt_finder.a = 0 if is_ok else 1
         rtt = self._rtt_finder.find_roundtriptime(1)
+        is_valid_cert = None
+        if self._ssl_checker is not None:
+            is_valid_cert = self._ssl_checker.verify_cert()
         res = CheckResultPerfomance(self._ip, self._port, datetime.now(),
-                                    self._from_domain, rtt.total_seconds()*1000, is_ok if self._port != -1 else None)
+                                    self._from_domain, rtt.total_seconds()*1000,
+                                    is_ok if self._port != -1 else None,
+                                    ssl_status=is_valid_cert)
         return res
 
     def __repr__(self):
